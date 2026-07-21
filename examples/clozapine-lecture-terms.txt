@@ -1,0 +1,9 @@
+# Expected vocabulary for a clozapine lecture
+clozapine
+agranulocytosis
+myocarditis
+titration
+neutrophil
+rechallenge
+sialorrhea
+seizure threshold
