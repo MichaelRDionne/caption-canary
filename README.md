@@ -62,5 +62,24 @@ context predicts — applies to summaries, extractions, and translations.
 pip install pytest && python -m pytest tests/ -v
 ```
 
+## 🪨 in caveman
+
+<p align="center"><img src="assets/caveman.svg" width="120" alt="caveman"></p>
+
+*(for when above too many word)*
+
+ROBOT LISTEN. ROBOT WRITE DOWN WHAT HEAR. WORDS COME OUT SMOOTH.<br>
+SMOOTH NOT MEAN RIGHT — ROBOT SWAP HARD WORD FOR EASY WORD THAT SOUND SAME. SNEAKY.
+
+THIS TOOL = CANARY. CANARY KNOW WHAT WORD BELONG.<br>
+RIGHT WORD GONE, FAKE WORD SNEAK IN → CANARY SING. CANARY QUIET → PROBABLY FINE.
+
+EYEBALL TIRED. EYEBALL TRUST SMOOTH.<br>
+CANARY NOT TRUST SMOOTH — CANARY LISTEN FOR WORD THAT SHOULD BE THERE. NOT THERE = DANGER.
+
+🪨 Caveman voice borrowed, with thanks, from **[caveman](https://github.com/JuliusBrussee/caveman)** by [Julius Brussee](https://github.com/JuliusBrussee) — a Claude Code skill that makes agents talk like this to cut ~75% of output tokens. Credit to him for the style; go star it.
+
+## License
+
 No dependencies beyond the standard library. Test fixtures are synthetic
 reconstructions of the failure mode. MIT license.
