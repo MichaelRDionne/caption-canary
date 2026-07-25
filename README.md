@@ -56,6 +56,8 @@ correctness, and the absence of expected domain signal is a measurable red
 flag.** The same trick — score generated output against the vocabulary its
 context predicts — applies to summaries, extractions, and translations.
 
+Companion essay: **[When Not to Use a Model](https://github.com/MichaelRDionne/MichaelRDionne/blob/main/when-not-to-use-a-model.md)** — this tool is the third of three cases on when a deterministic check beats a better model.
+
 ## Run it
 
 ```bash
