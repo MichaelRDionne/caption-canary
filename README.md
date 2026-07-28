@@ -1,7 +1,13 @@
 # caption-canary
 
-Detect machine transcripts that failed *silently* — the ones that read
-fluently and are wrong.
+Catch AI transcripts that failed *silently* — the ones that read fluently and
+are wrong.
+
+When speech-to-text mangles specialist audio, it doesn't crash or garble. It
+substitutes: the hard technical words get replaced by ordinary words that sound
+the same, and the result reads like a normal sentence. This tool checks a
+transcript for the vocabulary its topic says should be there, and raises the
+alarm when it isn't.
 
 ## The failure mode
 
