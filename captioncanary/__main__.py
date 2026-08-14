@@ -1,4 +1,6 @@
-"""CLI: python -m captioncanary transcript.txt terms.txt [--compare other.txt]"""
+"""CLI: python -m captioncanary transcript.txt terms.txt [--compare other.txt]
+       python -m captioncanary harvest pairs.jsonl
+"""
 
 import argparse
 import json
@@ -8,7 +10,43 @@ from pathlib import Path
 from .core import compare_transcripts, score_transcript
 
 
+def _harvest(argv: list[str]) -> int:
+    from .harvest import format_candidates, harvest, load_known, read_jsonl
+
+    ap = argparse.ArgumentParser(
+        prog="captioncanary harvest",
+        description="Screen paired raw/corrected transcripts for addable substitutions.",
+    )
+    ap.add_argument("pairs", help="JSONL with raw/corrected (or asr/formatted) fields")
+    ap.add_argument("--blocklist", type=Path, help="one regex per line, comments ok")
+    ap.add_argument(
+        "--known",
+        type=Path,
+        nargs="*",
+        default=[],
+        help="existing term lists or tests to skip",
+    )
+    ap.add_argument("--min-count", type=int, default=1)
+    ap.add_argument("--json", action="store_true", dest="as_json")
+    args = ap.parse_args(argv)
+
+    rows = read_jsonl(Path(args.pairs))
+    known = load_known(list(args.known)) if args.known else set()
+    cands = harvest(rows, blocklist=args.blocklist, known=known, min_count=args.min_count)
+    if args.as_json:
+        print(json.dumps(
+            [c.__dict__ for c in cands],
+            indent=2,
+        ))
+    else:
+        print(format_candidates(cands))
+    return 0
+
+
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == "harvest":
+        return _harvest(sys.argv[2:])
+
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument(
         "transcript",

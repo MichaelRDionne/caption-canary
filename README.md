@@ -66,6 +66,21 @@ mean one of them silently failed:
 $ python -m captioncanary autocaptions.txt terms.txt --compare whisper.txt
 ```
 
+## Harvest more substitutions
+
+Paired raw / corrected transcripts (JSONL, one object per line with
+`raw` and `corrected`) go through a screen: drop email, phone, dates,
+name-shaped tokens, hyphenation, and unit polish (`milligrams` → `mg`).
+What remains is a review list of spans the matcher can actually recover.
+Nothing from the surrounding utterance is kept.
+
+```
+$ python -m captioncanary harvest pairs.jsonl --known tests/test_canary.py
+```
+
+`--blocklist` takes extra regexes (one per line) for anything else that
+must never become a fixture. Review the list. Then add what you want.
+
 ## Why this matters beyond captions
 
 This is a general pattern for AI-output QC: **fluency is not evidence of
