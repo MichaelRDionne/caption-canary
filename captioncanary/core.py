@@ -12,8 +12,12 @@ psychopharmacology lecture that contains almost no psychopharmacology terms
 is a red flag regardless of how clean it reads.
 """
 
+from __future__ import annotations
+
 import re
 from dataclasses import dataclass, field
+
+from .clean import prepare_transcript
 
 
 @dataclass
@@ -57,10 +61,12 @@ def find_near_misses(text: str, term: str, window: int = 4) -> str | None:
             # Phonetic substitutions keep most of the letter material but not
             # letter positions ("closeapin" vs "clozapine" differs at 6 of 9
             # positions), so positional comparison fails — sequence similarity
-            # is the right measure. First letter must agree to cut noise.
-            if run[0] != target[0]:
-                continue
+            # is the right measure. First letter must agree to cut noise,
+            # except at very high similarity ("free challenge" / "rechallenge"
+            # is 0.92 and the letter rule would drop it).
             ratio = SequenceMatcher(None, run, target).ratio()
+            if run[0] != target[0] and ratio < 0.90:
+                continue
             span = " ".join(words[i : j + 1])
             if ratio >= 0.75 and span != term.lower() and ratio > best_ratio:
                 best_span, best_ratio = span, ratio
@@ -82,10 +88,13 @@ def score_transcript(
     if not expected_terms:
         raise ValueError("expected_terms must be non-empty")
 
+    transcript = prepare_transcript(transcript)
     norm = _normalize(transcript)
     found, missing, near = [], [], {}
     for term in expected_terms:
-        if _normalize(term).strip() in norm and term.strip():
+        needle = _normalize(term).strip()
+        present = bool(needle) and re.search(r"\b" + re.escape(needle) + r"\b", norm)
+        if present:
             found.append(term)
         else:
             missing.append(term)

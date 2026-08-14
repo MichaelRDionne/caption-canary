@@ -47,6 +47,23 @@ def test_fluent_nonsense_fails():
 def test_phonetic_substitution_detected():
     # The signature failure: the term's letters survive, split across words.
     assert find_near_misses(FLUENT_NONSENSE, "clozapine") == "close a pin"
+    assert find_near_misses(FLUENT_NONSENSE, "seizure threshold") == "see sure threshold"
+    # First-letter waiver: ratio is high enough that the letter rule would
+    # have dropped this.
+    assert find_near_misses(FLUENT_NONSENSE, "rechallenge") == "free challenge"
+
+
+def test_weaker_substitutions_are_not_invented():
+    # These are real caption failures in the fixture. Sequence similarity
+    # is below the 0.75 cut, so the canary reports them as missing, not as
+    # recovered spans. Do not lower the cut to chase them.
+    assert find_near_misses(FLUENT_NONSENSE, "agranulocytosis") is None
+    assert find_near_misses(FLUENT_NONSENSE, "myocarditis") is None
+    assert find_near_misses(FLUENT_NONSENSE, "neutrophil") is None
+    assert find_near_misses(FLUENT_NONSENSE, "sialorrhea") is None
+    # "situation" / "titration" is 0.78 but first letters disagree and
+    # the ratio is under the 0.90 waiver.
+    assert find_near_misses(FLUENT_NONSENSE, "titration") is None
 
 
 def test_exact_term_is_not_a_near_miss():
@@ -69,3 +86,43 @@ def test_compare_prefers_whisper_over_bad_captions():
 def test_empty_terms_rejected():
     with pytest.raises(ValueError):
         score_transcript(GOOD, [])
+
+
+VTT_FLUENT_NONSENSE = """WEBVTT
+
+00:00:00.000 --> 00:00:03.000
+Today we cover close a pin.
+
+00:00:02.000 --> 00:00:05.500
+close a pin. The feared risks are
+
+00:00:04.000 --> 00:00:08.000
+The feared risks are a granular site process
+"""
+
+
+def test_vtt_rolling_overlap_is_collapsed_then_scored():
+    from captioncanary.clean import prepare_transcript
+
+    cleaned = prepare_transcript(VTT_FLUENT_NONSENSE)
+    assert cleaned.count("close a pin") == 1
+    assert cleaned.count("The feared risks are") == 1
+    assert "WEBVTT" not in cleaned
+    assert "-->" not in cleaned
+
+    r = score_transcript(VTT_FLUENT_NONSENSE, PSYCHOPHARM_TERMS)
+    assert r.verdict == "failed"
+    assert r.near_misses["clozapine"] == "close a pin"
+
+
+def test_plain_text_is_not_rewritten():
+    from captioncanary.clean import prepare_transcript
+
+    assert prepare_transcript(GOOD) == GOOD
+
+
+def test_substring_is_not_a_hit():
+    # "pine" sits inside "clozapine"; a bare-substring check would count it.
+    r = score_transcript(GOOD, ["pine", "cardio"])
+    assert r.found == []
+

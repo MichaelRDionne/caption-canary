@@ -31,7 +31,7 @@ lecture that contains almost no clozapine-lecture words is broken, no matter
 how clean it reads:
 
 ```
-$ python -m captioncanary transcript.txt terms.txt
+$ python -m captioncanary transcript.vtt terms.txt
 FAILED: only 0% of expected terms present; phonetic substitutions detected:
 {'clozapine': 'close a pin', 'seizure threshold': 'see sure threshold'}
 — transcript is likely fluent nonsense for this topic
@@ -45,7 +45,15 @@ Two checks:
    failure is that a term's letter material survives, split across adjacent
    common words. Positional string comparison misses this ("closeapin" vs
    "clozapine" differs at 6 of 9 positions), so the matcher uses sequence
-   similarity over squashed word runs and recovers exactly the garbled span.
+   similarity over squashed word runs and recovers the garbled span when
+   the letter skeleton is close enough (`clozapine` → `close a pin`,
+   `seizure threshold` → `see sure threshold`). Weaker soundalikes stay
+   in the missing list; the canary does not invent a span it cannot defend.
+
+WebVTT and SRT are first-class input. YouTube auto-captions overlap: the
+tail of cue N is the head of cue N+1. The tool strips timestamps and
+collapses that overlap before it scores, so a substitution is not split
+across a cue cut and a term is not counted twice.
 
 Comparison mode scores two transcripts of the same audio (platform captions
 vs a local Whisper run) and reports whether the coverage gap is big enough to
@@ -67,6 +75,7 @@ Companion essay: **[When Not to Use a Model](https://github.com/MichaelRDionne/M
 ## Run it
 
 ```bash
+python -m captioncanary examples/fluent-nonsense.vtt examples/clozapine-lecture-terms.txt
 pip install pytest && python -m pytest tests/ -v
 ```
 
