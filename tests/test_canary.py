@@ -131,6 +131,7 @@ MSE_TERMS = [
     "perseveration",
     "benztropine",
     "derealization",
+    "depersonalization",
     "antipsychotic",
     "escitalopram",
     "trazodone",
@@ -140,18 +141,18 @@ MSE_TERMS = [
 
 MSE_GOOD = """
 Today we review how to hear the MSE. Perseveration is not memory.
-Derealization is a perceptual complaint. Antipsychotics get blamed first.
-Nighttime trazodone and escitalopram show up on the same list. Seroquel
-needs a baseline AIMS before you climb the dose. Give benztropine if the
-stiffness is new.
+Derealization and depersonalization are perceptual complaints.
+Antipsychotics get blamed first. Nighttime trazodone and escitalopram
+show up on the same list. Seroquel needs a baseline AIMS before you
+climb the dose. Give benztropine if the stiffness is new.
 """
 
 MSE_NONSENSE = """
 Today we review how to hear the MSE. Preservation is not memory.
-De-realizations is a perceptual complaint. Anti-psychotics get blamed first.
-Nighttime trazadone and escatalopram show up on the same list. Saraquel
-needs a bass line AIMS before you climb the dose. Give benzotropine if the
-stiffness is new.
+De-realizations and de-personalization are perceptual complaints.
+Anti-psychotics get blamed first. Nighttime trazadone and escatalopram
+show up on the same list. Saraquel needs a bass line AIMS before you
+climb the dose. Give benzotropine if the stiffness is new.
 """
 
 
@@ -168,8 +169,19 @@ def test_mse_fluent_nonsense_fails():
     assert r.coverage <= 0.2
     assert r.near_misses["perseveration"] == "preservation"
     assert r.near_misses["benztropine"] == "benzotropine"
+    assert r.near_misses["depersonalization"] == "de personalization"
     assert r.near_misses["escitalopram"] == "escatalopram"
     assert r.near_misses["trazodone"] == "trazadone"
     assert r.near_misses["seroquel"] == "saraquel"
     assert r.near_misses["baseline"] == "bass line"
+
+
+def test_same_terms_other_misspellings():
+    # Other attested garbles of the same terms. One dialogue can only
+    # carry one span per term; these lock the rest.
+    assert find_near_misses("marked perserveration on exam", "perseveration") == "perserveration"
+    assert find_near_misses("give benstropine one milligram", "benztropine") == "benstropine"
+    assert find_near_misses("started on eschatolopram", "escitalopram") == "eschatolopram"
+    assert find_near_misses("started on escotalicram", "escitalopram") == "escotalicram"
+    assert find_near_misses("seroquil three hundred", "seroquel") == "seroquil"
 

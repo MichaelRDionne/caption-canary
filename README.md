@@ -48,7 +48,8 @@ Two checks:
    similarity over squashed word runs and recovers the garbled span when
    the letter skeleton is close enough (`clozapine` → `close a pin`,
    `seizure threshold` → `see sure threshold`, `perseveration` →
-   `preservation`, `escitalopram` → `escatalopram`). Weaker soundalikes
+   `preservation` / `perserveration`, `escitalopram` → `escatalopram` /
+   `eschatolopram`, `seroquel` → `saraquel` / `seroquil`). Weaker soundalikes
    stay in the missing list; the canary does not invent a span it cannot
    defend.
 
