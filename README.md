@@ -47,8 +47,10 @@ Two checks:
    "clozapine" differs at 6 of 9 positions), so the matcher uses sequence
    similarity over squashed word runs and recovers the garbled span when
    the letter skeleton is close enough (`clozapine` → `close a pin`,
-   `seizure threshold` → `see sure threshold`). Weaker soundalikes stay
-   in the missing list; the canary does not invent a span it cannot defend.
+   `seizure threshold` → `see sure threshold`, `perseveration` →
+   `preservation`, `escitalopram` → `escatalopram`). Weaker soundalikes
+   stay in the missing list; the canary does not invent a span it cannot
+   defend.
 
 WebVTT and SRT are first-class input. YouTube auto-captions overlap: the
 tail of cue N is the head of cue N+1. The tool strips timestamps and
@@ -76,6 +78,7 @@ Companion essay: **[When Not to Use a Model](https://github.com/MichaelRDionne/M
 
 ```bash
 python -m captioncanary examples/fluent-nonsense.vtt examples/clozapine-lecture-terms.txt
+python -m captioncanary examples/psych-mse-fluent-nonsense.txt examples/psych-mse-terms.txt
 pip install pytest && python -m pytest tests/ -v
 ```
 

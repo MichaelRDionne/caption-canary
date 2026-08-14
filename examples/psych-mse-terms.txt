@@ -1,0 +1,9 @@
+# Expected vocabulary for an MSE / psychopharm lecture
+perseveration
+benztropine
+derealization
+antipsychotic
+escitalopram
+trazodone
+seroquel
+baseline

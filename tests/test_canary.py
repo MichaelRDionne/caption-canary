@@ -126,3 +126,50 @@ def test_substring_is_not_a_hit():
     r = score_transcript(GOOD, ["pine", "cardio"])
     assert r.found == []
 
+
+MSE_TERMS = [
+    "perseveration",
+    "benztropine",
+    "derealization",
+    "antipsychotic",
+    "escitalopram",
+    "trazodone",
+    "seroquel",
+    "baseline",
+]
+
+MSE_GOOD = """
+Today we review how to hear the MSE. Perseveration is not memory.
+Derealization is a perceptual complaint. Antipsychotics get blamed first.
+Nighttime trazodone and escitalopram show up on the same list. Seroquel
+needs a baseline AIMS before you climb the dose. Give benztropine if the
+stiffness is new.
+"""
+
+MSE_NONSENSE = """
+Today we review how to hear the MSE. Preservation is not memory.
+De-realizations is a perceptual complaint. Anti-psychotics get blamed first.
+Nighttime trazadone and escatalopram show up on the same list. Saraquel
+needs a bass line AIMS before you climb the dose. Give benzotropine if the
+stiffness is new.
+"""
+
+
+def test_mse_lecture_passes():
+    r = score_transcript(MSE_GOOD, MSE_TERMS)
+    assert r.verdict == "ok"
+    assert r.coverage == 1.0
+    assert not r.near_misses
+
+
+def test_mse_fluent_nonsense_fails():
+    r = score_transcript(MSE_NONSENSE, MSE_TERMS)
+    assert r.verdict == "failed"
+    assert r.coverage <= 0.2
+    assert r.near_misses["perseveration"] == "preservation"
+    assert r.near_misses["benztropine"] == "benzotropine"
+    assert r.near_misses["escitalopram"] == "escatalopram"
+    assert r.near_misses["trazodone"] == "trazadone"
+    assert r.near_misses["seroquel"] == "saraquel"
+    assert r.near_misses["baseline"] == "bass line"
+

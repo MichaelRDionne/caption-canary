@@ -93,7 +93,9 @@ def score_transcript(
     found, missing, near = [], [], {}
     for term in expected_terms:
         needle = _normalize(term).strip()
-        present = bool(needle) and re.search(r"\b" + re.escape(needle) + r"\b", norm)
+        present = bool(needle) and re.search(
+            r"\b" + re.escape(needle) + r"s?\b", norm
+        )
         if present:
             found.append(term)
         else:
