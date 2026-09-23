@@ -64,6 +64,17 @@ def test_weaker_substitutions_are_not_invented():
     # "situation" / "titration" is 0.78 but first letters disagree and
     # the ratio is under the 0.90 waiver.
     assert find_near_misses(FLUENT_NONSENSE, "titration") is None
+    # Attested garbles outside the fixture, also under the cut (0.67, 0.63).
+    assert find_near_misses("started dawn pazil for memory", "donepezil") is None
+    assert find_near_misses("continue surtr lean daily", "sertraline") is None
+    # "ritazapine" / "mirtazapine" is 0.86 but first letters disagree and
+    # the ratio is under the 0.90 waiver.
+    assert find_near_misses("started ritazapine at night", "mirtazapine") is None
+    # "ph" sounds like f, but "phylloxetine" fails the letter rule and the
+    # cut (0.73). Folding ph into f would recover it; one pair does not
+    # justify a global rule.
+    assert find_near_misses("switched to phylloxetine last month", "fluoxetine") is None
+
 
 
 def test_exact_term_is_not_a_near_miss():
@@ -184,4 +195,14 @@ def test_same_terms_other_misspellings():
     assert find_near_misses("started on eschatolopram", "escitalopram") == "eschatolopram"
     assert find_near_misses("started on escotalicram", "escitalopram") == "escotalicram"
     assert find_near_misses("seroquil three hundred", "seroquel") == "seroquil"
+
+
+def test_attested_psychopharm_garbles():
+    # Attested garbles of drugs outside both lecture fixtures.
+    assert find_near_misses("started on adamoxetine last spring", "atomoxetine") == "adamoxetine"
+    assert find_near_misses("continue divo pro x at bedtime", "divalproex") == "divo pro x"
+    assert find_near_misses("check the dival pro x level", "divalproex") == "dival pro x"
+    assert find_near_misses("chloropermazine as needed", "chlorpromazine") == "chloropermazine"
+    assert find_near_misses("restarted floxetine this week", "fluoxetine") == "floxetine"
+    assert find_near_misses("tapering filoxetine this week", "fluoxetine") == "filoxetine"
 
