@@ -206,3 +206,49 @@ def test_attested_psychopharm_garbles():
     assert find_near_misses("restarted floxetine this week", "fluoxetine") == "floxetine"
     assert find_near_misses("tapering filoxetine this week", "fluoxetine") == "filoxetine"
 
+
+OUTPATIENT_TERMS = [
+    "atomoxetine",
+    "divalproex",
+    "chlorpromazine",
+    "fluoxetine",
+    "sertraline",
+    "mirtazapine",
+]
+
+OUTPATIENT_GOOD = """
+We begin with attention and mood. Atomoxetine is preferred when stimulants carry
+misuse risk. For acute mania, divalproex titration requires baseline hepatic
+panels. When severe agitation emerges, chlorpromazine remains an option, while
+restarting fluoxetine handles the comorbid depression. Sertraline and mirtazapine
+round out the evening regimen.
+"""
+
+OUTPATIENT_NONSENSE = """
+We begin with attention and mood. Adamoxetine is preferred when stimulants carry
+misuse risk. For acute mania, dival pro x titration requires baseline hepatic
+panels. When severe agitation emerges, chloropermazine remains an option, while
+restarting floxetine handles the comorbid depression. Surtr lean and ritazapine
+round out the evening regimen.
+"""
+
+
+def test_outpatient_lecture_passes():
+    r = score_transcript(OUTPATIENT_GOOD, OUTPATIENT_TERMS)
+    assert r.verdict == "ok"
+    assert r.coverage == 1.0
+    assert not r.near_misses
+
+
+def test_outpatient_fluent_nonsense_fails():
+    r = score_transcript(OUTPATIENT_NONSENSE, OUTPATIENT_TERMS)
+    assert r.verdict == "failed"
+    assert r.coverage == 0.0
+    assert r.near_misses["atomoxetine"] == "adamoxetine"
+    assert r.near_misses["divalproex"] == "dival pro x"
+    assert r.near_misses["chlorpromazine"] == "chloropermazine"
+    assert r.near_misses["fluoxetine"] == "floxetine"
+    assert "sertraline" not in r.near_misses
+    assert "mirtazapine" not in r.near_misses
+
+

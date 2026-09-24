@@ -1,0 +1,7 @@
+# Expected vocabulary for an outpatient psychopharm lecture
+atomoxetine
+divalproex
+chlorpromazine
+fluoxetine
+sertraline
+mirtazapine
