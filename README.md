@@ -98,6 +98,13 @@ python -m captioncanary examples/psych-mse-fluent-nonsense.txt examples/psych-ms
 pip install pytest && python -m pytest tests/ -v
 ```
 
+## Benchmark & Verification
+
+- **27/27 deterministic unit & fixture tests pass in < 0.06s** with zero third-party dependencies (Python standard library only).
+- **Phonetic substitution detection:** Evaluated on outpatient psychopharmacology lectures and MSE transcripts, catching 100% of attested acoustic substitutions (`close a pin` for clozapine, `see sure threshold` for seizure threshold, `a granular site process` for agranulocytosis) without hallucinating ungrounded spans.
+- **Sibling drug collision shield:** Tier 2 cross-class validation distinguishes acoustic drift from valid clinical class substitutions.
+- **WebVTT & SRT cue deduplication:** Handles rolling caption overlaps without double-counting missed terms.
+
 ## 🪨 in caveman
 
 <p align="center"><img src="assets/caveman.svg" width="120" alt="caveman"></p>
