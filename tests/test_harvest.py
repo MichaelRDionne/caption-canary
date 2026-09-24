@@ -48,3 +48,17 @@ def test_skips_already_known_pair(tmp_path: Path):
     known = {("preservation", "perseveration")}
     cands = harvest(read_jsonl(src), known=known)
     assert cands == []
+
+
+def test_load_known_extracts_span_from_tests(tmp_path: Path):
+    src = tmp_path / "fixture.py"
+    src.write_text(
+        'assert find_near_misses("started on adamoxetine last spring", "atomoxetine") == "adamoxetine"\n'
+        'assert find_near_misses(FLUENT_NONSENSE, "clozapine") == "close a pin"\n'
+    )
+    from captioncanary.harvest import load_known
+
+    known = load_known([src])
+    assert ("adamoxetine", "atomoxetine") in known
+    assert ("close a pin", "clozapine") in known
+

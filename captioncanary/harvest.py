@@ -67,10 +67,10 @@ def load_known(paths: list[Path]) -> set[tuple[str, str]]:
     for path in paths:
         text = path.read_text()
         for m in re.finditer(
-            r"find_near_misses\(\s*\"([^\"]+)\"\s*,\s*\"([^\"]+)\"\s*\)",
+            r"find_near_misses\(\s*(?:\"[^\"]*\"|\w+)\s*,\s*\"([^\"]+)\"\s*\)\s*==\s*\"([^\"]+)\"",
             text,
         ):
-            known.add((m.group(1).lower(), m.group(2).lower()))
+            known.add((m.group(2).lower(), m.group(1).lower()))
         for m in re.finditer(
             r"near_misses\[\"([^\"]+)\"\]\s*==\s*\"([^\"]+)\"",
             text,
