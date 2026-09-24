@@ -271,4 +271,28 @@ def test_srt_and_bom_caption_recognition():
     assert "clozapine" in prepare_transcript(bom_vtt)
 
 
+def test_sibling_drug_collision_shield():
+    # Transcript accurately says citalopram, but expected list only has escitalopram.
+    # The shield ensures citalopram is recognized as an ambiguous sibling mention,
+    # NOT flagged as a phonetic corruption in near_misses.
+    text = "We initiated citalopram 20 milligrams for generalized anxiety."
+    r = score_transcript(text, ["escitalopram", "anxiety"])
+    assert "escitalopram" not in r.near_misses
+    assert r.ambiguous_mentions["escitalopram"] == "citalopram"
+    assert r.verdict == "ok"  # 50% coverage, no phonetic near_misses
+
+    # Clinical antonyms: hypokalemia vs hyperkalemia
+    text_lytes = "Patient developed marked hypokalemia on the loop diuretic."
+    r_lytes = score_transcript(text_lytes, ["hyperkalemia"])
+    assert "hyperkalemia" not in r_lytes.near_misses
+    assert r_lytes.ambiguous_mentions["hyperkalemia"] == "hypokalemia"
+
+    # True garbles like 'close a pin' must still land in near_misses
+    text_bad = "Today we cover close a pin."
+    r_bad = score_transcript(text_bad, ["clozapine"])
+    assert r_bad.near_misses["clozapine"] == "close a pin"
+    assert "clozapine" not in r_bad.ambiguous_mentions
+
+
+
 

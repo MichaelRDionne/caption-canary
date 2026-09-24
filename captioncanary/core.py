@@ -27,7 +27,9 @@ class CanaryReport:
     found: list[str] = field(default_factory=list)
     missing: list[str] = field(default_factory=list)
     near_misses: dict[str, str] = field(default_factory=dict)  # term -> lookalike found
+    ambiguous_mentions: dict[str, str] = field(default_factory=dict)  # term -> valid sibling found
     detail: str = ""
+
 
 
 def _normalize(text: str) -> str:
@@ -74,11 +76,32 @@ def find_near_misses(text: str, term: str, window: int = 4) -> str | None:
     return best_span
 
 
+DEFAULT_SIBLINGS: list[set[str]] = [
+    {"citalopram", "escitalopram"},
+    {"fluoxetine", "fluvoxamine"},
+    {"omeprazole", "esomeprazole"},
+    {"prednisone", "prednisolone"},
+    {"hyperkalemia", "hypokalemia"},
+    {"hypertension", "hypotension"},
+    {"naltrexone", "naloxone"},
+    {"methylphenidate", "dexmethylphenidate"},
+    {"amphetamine", "dextroamphetamine", "lisdexamfetamine"},
+]
+
+
+def _is_sibling_match(term: str, span: str, clusters: list[set[str]] | None = None) -> bool:
+    clusters = clusters or DEFAULT_SIBLINGS
+    t = term.lower().strip()
+    s = span.lower().strip()
+    return any(t in c and s in c for c in clusters)
+
+
 def score_transcript(
     transcript: str,
     expected_terms: list[str],
     ok_threshold: float = 0.5,
     fail_threshold: float = 0.2,
+    sibling_clusters: list[set[str]] | None = None,
 ) -> CanaryReport:
     """Score a transcript against the vocabulary its topic predicts.
 
@@ -91,7 +114,7 @@ def score_transcript(
 
     transcript = prepare_transcript(transcript)
     norm = _normalize(transcript)
-    found, missing, near = [], [], {}
+    found, missing, near, ambiguous = [], [], {}, {}
     for term in expected_terms:
         needle = _normalize(term).strip()
         present = bool(needle) and re.search(
@@ -103,17 +126,24 @@ def score_transcript(
             missing.append(term)
             lookalike = find_near_misses(transcript, term)
             if lookalike:
-                near[term] = lookalike
+                if _is_sibling_match(term, lookalike, sibling_clusters):
+                    ambiguous[term] = lookalike
+                else:
+                    near[term] = lookalike
 
     coverage = len(found) / len(expected_terms)
 
     if coverage >= ok_threshold and not near:
-        verdict, detail = "ok", "expected vocabulary present"
+        verdict = "ok"
+        detail = "expected vocabulary present" + (
+            f"; noted valid sibling entities: {ambiguous}" if ambiguous else ""
+        )
     elif coverage < fail_threshold or (near and coverage < ok_threshold):
         verdict = "failed"
         detail = (
             f"only {coverage:.0%} of expected terms present"
             + (f"; phonetic substitutions detected: {near}" if near else "")
+            + (f"; noted valid sibling entities: {ambiguous}" if ambiguous else "")
             + " — transcript is likely fluent nonsense for this topic"
         )
     else:
@@ -121,6 +151,7 @@ def score_transcript(
         detail = (
             f"{coverage:.0%} coverage"
             + (f"; possible substitutions: {near}" if near else "")
+            + (f"; noted valid sibling entities: {ambiguous}" if ambiguous else "")
             + " — spot-check before trusting"
         )
 
@@ -130,8 +161,10 @@ def score_transcript(
         found=found,
         missing=missing,
         near_misses=near,
+        ambiguous_mentions=ambiguous,
         detail=detail,
     )
+
 
 
 def compare_transcripts(

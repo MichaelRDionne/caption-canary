@@ -84,6 +84,7 @@ def main() -> int:
             "found": r.found,
             "missing": r.missing,
             "near_misses": r.near_misses,
+            "ambiguous_mentions": r.ambiguous_mentions,
             "detail": r.detail,
         }, indent=2))
     else:
@@ -91,7 +92,11 @@ def main() -> int:
         if r.near_misses:
             for term, span in r.near_misses.items():
                 print(f"  {term!r} likely garbled to {span!r}")
+        if r.ambiguous_mentions:
+            for term, span in r.ambiguous_mentions.items():
+                print(f"  {term!r} closely resembles valid sibling {span!r}")
     return 0 if r.verdict == "ok" else 1
+
 
 
 if __name__ == "__main__":
