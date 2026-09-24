@@ -14,7 +14,8 @@ import re
 
 TS_LINE = re.compile(
     r"^\s*(\d{1,2}:)?\d{1,2}:\d{2}([.,]\d{1,3})?\s*-->\s*"
-    r"(\d{1,2}:)?\d{1,2}:\d{2}([.,]\d{1,3})?"
+    r"(\d{1,2}:)?\d{1,2}:\d{2}([.,]\d{1,3})?",
+    re.MULTILINE,
 )
 LEADING_TS = re.compile(
     r"^\s*[\[\(]?\s*(\d{1,2}:)?\d{1,2}:\d{2}([.,]\d{1,3})?\s*[\]\)]?\s+"
@@ -26,17 +27,21 @@ HEADER = (
     "WEBVTT",
     "NOTE ",
     "NOTE\t",
-    "STYLE",
-    "REGION",
+    "STYLE ",
+    "STYLE\t",
+    "REGION ",
+    "REGION\t",
     "KIND:",
     "LANGUAGE:",
 )
 
 
 def looks_like_captions(text: str) -> bool:
-    if text.lstrip().upper().startswith("WEBVTT"):
+    cleaned = text.lstrip("\ufeff").lstrip()
+    if cleaned.upper().startswith("WEBVTT"):
         return True
-    return TS_LINE.search(text) is not None
+    return TS_LINE.search(cleaned) is not None
+
 
 
 def extract_cue_text(text: str) -> list[str]:
@@ -46,7 +51,7 @@ def extract_cue_text(text: str) -> list[str]:
         s = raw.strip()
         if not s:
             continue
-        if s.upper().startswith(HEADER):
+        if s.upper().startswith(HEADER) or s.upper() in {"STYLE", "REGION", "NOTE"}:
             continue
         if TS_LINE.match(s):
             continue

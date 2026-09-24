@@ -31,7 +31,8 @@ class CanaryReport:
 
 
 def _normalize(text: str) -> str:
-    return re.sub(r"[^a-z0-9\s]", " ", text.lower())
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9\s]", " ", text.lower())).strip()
+
 
 
 def _squash(term: str) -> str:

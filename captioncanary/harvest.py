@@ -116,7 +116,9 @@ def pair_from_texts(raw: str, fixed: str) -> list[tuple[str, str]]:
     ta, tb = tokens(raw), tokens(fixed)
     if not ta or not tb:
         return []
-    sm = SequenceMatcher(None, [t.lower() for t in ta], [t.lower() for t in tb])
+    sm = SequenceMatcher(
+        None, [t.lower() for t in ta], [t.lower() for t in tb], autojunk=False
+    )
     out: list[tuple[str, str]] = []
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
         if tag == "equal":

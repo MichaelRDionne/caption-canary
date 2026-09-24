@@ -62,3 +62,14 @@ def test_load_known_extracts_span_from_tests(tmp_path: Path):
     assert ("adamoxetine", "atomoxetine") in known
     assert ("close a pin", "clozapine") in known
 
+
+def test_harvest_preserves_diffs_on_long_repetitive_text():
+    from captioncanary.harvest import pair_from_texts
+
+    raw = "start escatalopram at bedtime. " * 50
+    fixed = "start escitalopram at bedtime. " * 50
+    pairs = pair_from_texts(raw, fixed)
+    assert len(pairs) == 50
+    assert pairs[0] == ("escatalopram", "escitalopram")
+
+

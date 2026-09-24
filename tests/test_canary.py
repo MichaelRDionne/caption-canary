@@ -252,3 +252,23 @@ def test_outpatient_fluent_nonsense_fails():
     assert "mirtazapine" not in r.near_misses
 
 
+def test_multiword_term_whitespace_and_punctuation():
+    text = "We carefully monitored the seizure, threshold and seizure\nthreshold."
+    r = score_transcript(text, ["seizure threshold"])
+    assert r.verdict == "ok"
+    assert "seizure threshold" in r.found
+
+
+def test_srt_and_bom_caption_recognition():
+    from captioncanary.clean import looks_like_captions, prepare_transcript
+
+    srt = "1\n00:00:01,000 --> 00:00:04,000\nToday we cover clozapine.\n"
+    assert looks_like_captions(srt)
+    assert "clozapine" in prepare_transcript(srt)
+
+    bom_vtt = "\ufeffWEBVTT\n\n00:00:01.000 --> 00:00:04.000\nToday we cover clozapine.\n"
+    assert looks_like_captions(bom_vtt)
+    assert "clozapine" in prepare_transcript(bom_vtt)
+
+
+
